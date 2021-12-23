@@ -1,0 +1,100 @@
+<!--    
+    * Created By     : Apps Team
+    * Created Date   : 15/11/2021
+    * Description    : Article Search, based on Selected Term and Language
+    * Class     	 : CaseKnowledgeSearchController
+    * Aura Component : Case_knowledgeSearchAura
+    * LWC            : case_knowledgeSearch    
+-->
+<template>
+    <div>
+        <div class="slds-grid slds-gutters slds-wrap slds-p-around_medium" >        
+            <div class="slds-col slds-size_2-of-3 slds-m-top_xx-small">
+                <div class="slds-form_element">
+                    <div class="slds-form-element_control">
+                        <div class="slds-combobox_container">
+                            <div id="box" class={boxClass} aria-expanded="true" aria-haspopup="listbox" role="combobox">
+                                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                                    <div class="slds-p-top_none">
+                                        <lightning-input class={inputClass} type="search" 
+                                                         id="input" value={searchTerm}
+                                                         onclick={handleClick} 
+                                                         onblur={onBlur} 
+                                                         onchange={searchKnowledge} 
+                                                         onkeyup={searchKnowledge}                                                          
+                                                         autocomplete="off" 
+                                                         placeholder="Search">
+                                                        </lightning-input>
+                                    </div>
+                                </div>
+                                <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                        <template for:each={searchList} for:item="record">
+                                            <li key={record.articleRecord.Id} onclick={handleSelect} data-record-id={record.articleRecord.Id} role="presentation">
+                                                <span class="slds-lookup__item-action slds-lookup__item-action--label" role="option">
+                                                    <lightning-icon class="slds-icon slds-icon--small slds-icon-text-default" 
+                                                                    icon-name="standard:article" size="small">
+                                                                    </lightning-icon>
+                                                    <span class="slds-truncate">{record.articleRecord.Title}</span>
+                                                </span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+            <!-- Language Dropdown-->
+            <div class="slds-col slds-size_1-of-3"> 
+                  <lightning-combobox  label="Language" 
+                                        dropdown-alignment="auto"
+                                        name="language" 
+                                        value={languageCode} 
+                                        options={langOptions} onchange={handleLanguage}></lightning-combobox>         
+
+             </div>             
+        </div>
+        <div class="slds-p-around_medium">
+            <h4 if:false={searchDone}>Suggested Articles</h4>
+            <h4 if:true={searchDone}>{searching} &nbsp;<a href="javascript:void(0);" onclick={backToInitialData} class="slds-text-body_small">(Back to Suggestions)</a></h4>
+            <div class="slds-scrollable" style="height:25rem;">
+                <!-- Records display panel-->
+                <ul if:true={isListAvailable} class="slds-has-dividers_bottom-space">
+                    <template for:each={displayArticles} for:item="record">                   
+                        <li key={record.articleRecord.Id} class="slds-item slds-p-vertical--x-small">
+                            <div class="slds-tile">
+                                <div class="slds-grid">
+                                    <div class="slds-size_5-of-6 slds-has-flexi-truncate">                                    
+                                        <a href="javascript:void(0);" onclick={handleSelect} data-record-id={record.articleRecord.Id}>
+                                            {record.articleRecord.Title}                                                                 
+                                        </a>
+                                    </div>
+                                    <div class="slds-size_1-of-6">
+                                        <lightning-button-menu icon-size="x-small" class="slds-float_right" menu-alignment="auto" onselect={handleOnselect} data-record-id={record.articleRecord.Id} title="Show More">
+                                            <lightning-menu-item value="AttachArticle" label="Attach Article" disabled={record.isAttachDisable}></lightning-menu-item>
+                                            <lightning-menu-item value="InsertURL" label="Insert URL into Email" disabled={record.isUrlDisable}></lightning-menu-item>
+                                            <lightning-menu-item value="InsertArticle" if:false={record.isBodyDisable} label="Insert Article into Email" disabled={record.isBodyDisable}></lightning-menu-item>
+                                        </lightning-button-menu>
+                                    </div>
+                                </div>
+                                <div class="slds-tile__detail slds-text-body_small">
+                                    <ul class="slds-list--horizontal slds-wrap slds-has-dividers_right">
+                                        <li class="slds-item">{record.articleRecord.ArticleNumber}</li>
+                                        <li class="slds-item">{record.articleRecord.ValidationStatus}</li>
+                                        <li class="slds-item">Last Published &nbsp; <lightning-formatted-date-time value={record.articleRecord.LastPublishedDate} year="numeric" month="short" day="2-digit" hour="numeric" minute="numeric"></lightning-formatted-date-time></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    </template>
+                </ul> 
+                <!-- No records Display Panel-->
+                <p if:false={isListAvailable} class="slds-p-around_small">                
+                    <span>No Records Found</span>
+                </p>            
+            </div>                     
+        </div>        
+    </div>    
+</template>

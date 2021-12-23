@@ -1,0 +1,41 @@
+<!--
+    
+    * Created By     : Apps Team
+    * Created Date   : 15/11/2021
+    * Description    : Article Search, based on Selected Term and Language
+    * Class     	 : CaseKnowledgeSearchController
+    * Aura Component : Case_knowledgeSearchAura
+    * LWC            : case_knowledgeSearch
+    
+-->
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" 
+                controller="CaseKnowledgeSearchController" 
+                access="global">
+    <!-- Component Attributes -->
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="isShowSpinner" type="boolean" default="false"/>
+    <aura:attribute name="isAccessible" type="boolean" default="false"/>
+    
+    <!-- Handler -->
+    <aura:handler name="init" value="this" action="{!c.checkPermission}"></aura:handler>
+    <!-- Global quick action Api -->
+    <lightning:quickActionAPI aura:id="quickActionAPI"/>       
+    
+    <!-- LWC - Child Component Start-->
+    <lightning:card title="Knowledge" variant="Narrow">
+    	<div>
+            <aura:if isTrue="{!v.isShowSpinner}">
+                <div class="exampleHolder">
+                    <lightning:spinner variant="brand" alternativeText="Loading..."></lightning:spinner>
+                </div>    	
+            </aura:if>
+            <aura:if isTrue="{!v.isAccessible}">
+                <c:case_knowledgeSearch aura:id="lwcSrarchComponent" recordId ="{!v.recordId}" onhandleaction="{!c.handleActions}"></c:case_knowledgeSearch>  
+                <aura:set attribute="else">
+                    <p class="slds-align_absolute-center slds-text-color_weak">{!$Label.c.Knowledge_Search_Component_Access_Message}</p>
+                </aura:set>      
+            </aura:if>        
+    	</div> 
+    </lightning:card>   
+    <!-- LWC - Child Component End-->
+</aura:component>
