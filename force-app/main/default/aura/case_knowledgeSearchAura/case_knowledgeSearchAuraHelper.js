@@ -101,7 +101,7 @@
         $A.enqueueAction(action);
     },
     
-    // Toast Message
+    // Toast Message event
     showToastMessage : function(msg, type, title) {
         var toastEvt = $A.get('e.force:showToast');
         toastEvt.setParams({
