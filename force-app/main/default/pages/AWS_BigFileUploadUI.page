@@ -1,0 +1,278 @@
+<!-- Upload a big file into Aws from local system through salesforce -->
+<apex:page standardController="Case" extensions="AWS_BigFileUploadController"
+           docType="html-5.0" sidebar="false" showHeader="false" showChat="false" 
+           showQuickActionVfHeader="false"
+           lightningStylesheets="true" standardStylesheets="false" setup="false">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>   
+    
+    <style>
+        th, td {
+        font-size: 13px !important;
+        line-height: 2;
+        }
+        #mainContent {        
+        text-align:center;
+        } 
+        form {
+        font-size: 14px !important;        
+        width:100%;        
+        display: inline-block;
+        padding: 20px;
+        border: 1px solid #cccccc;
+        border-radius: 10px;
+        -moz-border-radius: 10px;
+        -webkit-box-shadow: 0 0 10px #ccc;
+        -moz-box-shadow: 0 0 10px #ccc;
+        box-shadow: 0 0 10px #ccc;
+        background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f2f2f2));
+        }
+        .container{ width:310px;}        
+        .modal-title{text-align:center;} 
+        #fileUploader {
+        width: 450px;
+        height: 60px;        
+        padding: 4px;
+        border: 1px dashed rgb(221, 219, 218); 
+        background-color: transparent;
+        position: relative;
+        cursor: pointer;       
+        font-color:grey;        
+        }    
+        #fileUploader::after {
+        content: 'or drop files...';
+        position: absolute;        
+        font-size: 12px;
+        top: 70%;
+        margin-top: 8px;
+        left: 38%;
+        transform: translate(-50%, -50%);
+        }
+        .btn-lg{
+        font-size: 14px !important;
+        border-radius: 8px !important;
+        padding: 8px !important;
+        }
+    </style>
+
+    <apex:remoteObjects jsNamespace="RemoteObjectModel">
+        <apex:remoteObjectModel name="AWS_File__c" fields="Name,Case__c,Asset__c,File_Size__c,AWS_File_Id__c,Upload_Date__c"></apex:remoteObjectModel>        
+    </apex:remoteObjects>
+
+    <apex:slds />
+
+    <div class="slds-scope">
+        <div id="mainContent">        
+            <form id="upload_form" enctype="multipart/form-data" method="post">
+                <div class="container-fluid">                  
+                    <div style="padding-left:20px;">
+                        <div>                 
+                            <input type="file" name="file" id="fileUploader" class="slds-file-selector__button slds-button slds-button_neutral" style="padding: 2% 30%; width: 100%; text-align: center;" multiple="multiple"/>                            
+                        </div>
+                        <div class="col-sm-6" style="text-align:right;">
+                            <input type="button" id="btnUpload" style="display:none;margin-top:10px;font-size:12px;" value="Upload File" onclick="uploadFiles()"
+                                   class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal"/>
+                        </div>
+                    </div>              
+                    
+                    <!-- Modal Start-->
+                    <div class="modal fade" id="myModal" role="dialog">
+                        <div class="modal-dialog modal-md">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">File Upload Status</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div id="divFiles" class="files"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal End -->
+                    <div>
+                    </div>
+                </div>
+            </form>
+        </div> 
+        <br/>
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+            <!-- Table Header -->
+            <thead>
+                <tr class="slds-line-height_reset">
+                    <th scope="col">
+                        FILE NAME
+                    </th>
+                    <apex:outputPanel rendered="{! if($Profile.Name == 'Customer Community User' ||
+                                                $Profile.Name == 'Community User' ||
+                                                $Profile.Name == 'Customer Community Login User', false, true)}">
+                        <th scope="col">
+                            AWS FILE PATH 
+                        </th>
+                    </apex:outputPanel>
+                    <th scope="col">
+                        SIZE
+                    </th>
+                    <th scope="col">
+                        UPLOAD DATE
+                    </th>
+                </tr>
+            </thead>
+            <!-- /Table Header -->
+            <!-- Table Body -->
+            <tbody>
+                <apex:repeat value="{!awsFileList}" var="awsFile">
+                    <tr>
+                        <td scope="col" style="word-wrap:break-word !important;">
+                            {!awsFile.Name}
+                        </td>
+                        <apex:outputPanel rendered="{! if($Profile.Name == 'Customer Community User' ||
+                                                    $Profile.Name == 'Community User' ||
+                                                    $Profile.Name == 'Customer Community Login User', false, true)}">
+                            <td scope="col">
+                                <a href="{!awsFile.AWS_File_Id__c}" target="_blank">{!SUBSTITUTE(awsFile.AWS_File_Id__c, "https://test.s3.amazonaws.com/", ".../")}</a>
+                            </td>
+                        </apex:outputPanel>
+                        <td scope="col">
+                            {!awsFile.File_Size__c }
+                        </td>
+                        
+                        <td scope="col">
+                            <apex:outputText value="{0, date, MMMM d','  yyyy}">
+                                <apex:param value="{!awsFile.Upload_Date__c}" /> 
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                </apex:repeat>
+            </tbody>
+            <!-- /Table Body -->
+        </table>
+    </div>
+    
+    <script type="text/javascript">
+    $(document).ready(function () {        
+        $('input[type=file]').change(function () {
+            if('{!Case.Id}' == ''){alert('Sorry, Case Id was Misssing!'); return;}
+            $('#btnUpload').show();
+            $('#divFiles').html('');            
+        })
+    });
+    
+    function uploadFiles() {
+        
+        var caseRecId = '{!Case.Id}'; 
+        var AssetId = '{!Case.AssetId}';
+        var Assetname = '{!Case.Asset.Name}' != '' ? '{!Case.Asset.Name}' : 'Asset';
+        var AccountName = '{!Case.Account.Name}' != '' ? '{!Case.Account.Name}' : 'Account';
+        
+        var file = document.getElementById("fileUploader");        
+        var folderName = AccountName.replace(/[^A-Za-z0-9]/g,'_')+'/'+Assetname.replace(/[^A-Za-z0-9]/g,'_');        
+        
+        var backetName = '{!bucketName}';                 
+        
+        for (let i = 0; i < file.files.length; i++) {
+            
+            let fileName = file.files[i].name;
+            let finalFileName = folderName+'/'+fileName;
+            
+            let sFile = file.files[i];
+            let fileSize = file.files[i].size;           
+            
+            let filePathUrl = 'https://'+backetName+'.s3.amazonaws.com/'+finalFileName;
+            
+            let obj = {"CaseId": caseRecId, "AssetId": AssetId, "FileName":fileName, "FileSize":fileSize, "AwsPath":filePathUrl};
+            
+            if(fileSize > 0){
+                var fileId = i;
+                $("#divFiles").append('<div class="col-md-12">' + 
+                                      '<div class="progress" style="height:10px;margin-bottom:4px;-webkit-box-shadow: none;">'+
+                                      '<div class="progress-bar progress-bar-striped active" id="progressbar_' + fileId + '" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:0%"/></div>' +
+                                      '</div>' +
+                                      '<div class="col-md-12">' +
+                                      '<div class="col-md-6" style="text-align:left;">' +
+                                      '<input type="button" class="btn btn-danger" style="display:none;line-height:6px;height:25px;" id="cancel_' + fileId + '" value="cancel">' +
+                                      '</div>' +
+                                      '<div class="col-md-6">' +
+                                      '<p class="progress-status" style=";margin-right:-15px;font-weight:bold;color:saddlebrown;text-align:right;" id="status_' + fileId + '"></p>' +
+                                      '</div>' +
+                                      '</div>' +
+                                      '<div class="col-md-12" style="text-align:right;">' +
+                                      '<p id="notify_' + fileId + '"></p>' +
+                                      '</div>');
+                uploadSingleFile(sFile, i, filePathUrl,obj);
+            }
+        }
+    }
+    function uploadSingleFile(formData, i, fileUrl,obj) {
+        
+        let fileId = i;
+        let FileDetails = JSON.stringify(obj);
+        
+        s3.upload({
+            Key: fileUrl,
+            Body: formData,
+            ACL: 'public-read'
+        }, function(err, data) {
+            if(err) {
+                $("#status_" + fileId).text("Error : "+err);                
+            }else{
+                let FileSize = (obj.FileSize/1024);
+                let finalSize = FileSize > 1 ? (FileSize/1024) > 1 ? (FileSize/1024).toFixed(1)+" MB": FileSize.toFixed(1)+" KB" :obj.FileSize.toFixed(1)+" B";
+                var request = {"Name":obj.FileName, "AWS_File_Id__c":obj.AwsPath, "File_Size__c":finalSize,"Case__c" :obj.CaseId,"Upload_Date__c" :new Date()};
+                if(obj.AssetId != ''){                    
+                    request["Asset__c"] = obj.AssetId;
+                } 
+                var ct = new RemoteObjectModel.AWS_File__c();
+                //ct.create(request); 
+                ct.create(request, function(err){
+                    if(err){
+                        $("#status_" + fileId).text("Upload Successful In AWS but Not updated In SF!");
+                    }else{                    
+                        $('#progressbar_' + fileId).css("width", "100%");
+                        $("#status_" + fileId).text("Upload Successful!");
+                    }
+                });
+            }          
+            
+        }).on('httpUploadProgress', function (e) {
+            let percent = parseInt((e.loaded / e.total) * 100);
+            $("#status_" + fileId).text(Math.round(percent) + "% uploaded, please wait...");
+            $('#progressbar_' + fileId).css("width", percent + "%")
+            $("#notify_" + fileId).text(obj.FileName+" Uploaded " + (e.loaded / 1048576).toFixed(2) + " MB of " + (e.total / 1048576).toFixed(2) + " MB ");
+            
+        }); 
+    }
+    </script>
+    <!-- aws Js modules -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.357.0.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    
+    <script type="text/javascript">
+    
+    //Bucket Configurations
+    
+    var bucketName = '{!bucketName}'; //test
+    var bucketRegion = '{!bucketRegion}'; //'us-east-1';
+    var IdentityPoolId = '{!IdentityPoolId}'; //'us-east-1:681f0-4ed-4ef9-aa1a-01f5a0ed8';
+    
+    AWS.config.update({
+        region: bucketRegion,
+        credentials: new AWS.CognitoIdentityCredentials({
+            IdentityPoolId: IdentityPoolId
+        })
+    });
+    
+    var s3 = new AWS.S3({
+        apiVersion: '2006-03-01',
+        params: {Bucket: bucketName}
+    });
+    </script>
+</apex:page>
