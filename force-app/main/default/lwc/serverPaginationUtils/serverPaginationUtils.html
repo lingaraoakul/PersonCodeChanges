@@ -1,0 +1,40 @@
+<template>
+    <div class="pagination">
+        <div class="pagination-summary">
+            <div class="summary-label">{pageSummary}</div>
+        </div>
+        <div class="pagination-buttons">
+            <lightning-button
+                title="Previous"
+                name="previous"
+                label="Previous"
+                icon-name="utility:chevronleft"
+                icon-position="left"
+                disabled={isPreviousButtonDisabled}
+                class="slds-p-right_xxx-small"
+                onclick={handlePreviousPage}
+            ></lightning-button>
+            <lightning-button
+                name="next"
+                title="Next"
+                label="Next"
+                icon-name="utility:chevronright"
+                icon-position="right"
+                disabled={isNextButtonDisabled}
+                onclick={handleNextPage}
+            ></lightning-button>
+        </div>
+        <div class="records-per-page-selector">
+            <lightning-combobox
+                label="Show:"
+                name="show"
+                variant="label-inline"
+                value={recordsPerPage}
+                placeholder={recordsPerPage}
+                options={recordsPerPageOptions}
+                dropdown-alignment="auto"
+                onchange={handleRecordsPerPageChange}
+            ></lightning-combobox>
+        </div>
+    </div>
+</template>

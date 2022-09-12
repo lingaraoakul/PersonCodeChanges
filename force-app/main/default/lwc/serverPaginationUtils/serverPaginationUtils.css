@@ -1,0 +1,20 @@
+.pagination {
+    display: grid;
+    grid-template-columns: 1.2fr 5fr 1.2fr;
+    align-items: center;
+}
+
+.pagination-summary {
+    margin-right: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0.2px;
+    color: #666666;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin: auto;
+}

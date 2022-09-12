@@ -1,0 +1,18 @@
+<template>
+    <div class="slds-card slds-var-p-around_medium slds-is-relative slds-card_boundary">
+        <div class="slds-page-header">
+            <div class="slds-text-heading_small">Server Pagination for Account Entity.</div>
+        </div>
+        <div class="slds-card__body">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+            <div class="slds-box slds-var-m-bottom_xx-small">
+                <c-server-pagination-utils page-no={count} records-total={recordsCount} onpaginationchange={handlePaginationChange}></c-server-pagination-utils>
+            </div>
+            <div class="slds-box">
+                <c-org-data-table key-field="Id" data={records} columns={columns}></c-org-data-table>
+            </div>
+        </div>
+    </div>
+</template>
