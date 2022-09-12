@@ -22,13 +22,21 @@ export default class ServerPaginationComponent extends LightningElement {
         this.isLoading = true;
         getAccountData({varRequest : JSON.stringify(this.request)})
         .then((result) => {
+
             if(result?.length === 0) {
                 return;
             }
-            this.dataMap.push({
-                key: this.count,
-                value: [result[0].Id, result[result.length -1].Id]
-            });
+
+            const index = this.dataMap?.findIndex( item => item.key === this.count);
+            if(index !== -1) {
+                this.dataMap[index].value = [result[0].Id, result[result.length -1].Id];
+            } else {
+                this.dataMap.push({
+                    key: this.count,
+                    value: [result[0].Id, result[result.length -1].Id]
+                });
+            }
+
             this.records = result?.map((record) => {
                 return {
                     ...record,
@@ -58,6 +66,7 @@ export default class ServerPaginationComponent extends LightningElement {
             case 'previous': {
                 this.preKey = this.dataMap[this.count-1].value[0];
                 this.nextKey = this.dataMap[this.count-1].value[1];
+                this.dataMap.pop();
                 this.count--;
                 break;
             }
