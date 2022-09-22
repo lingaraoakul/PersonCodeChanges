@@ -1,26 +1,25 @@
-public with sharing class AWS_BigFileUploadController {
-    
+public with sharing class AWS_BigFileUploadController{
+
     public string bucketName { get; set; }
     public String secret { get; set; }
     public String key { get; set; }
     public String bucketRegion {get; set;}
-    public String IdentityPoolId {get; set;}   
-    
-    ApexPages.StandardController con; 
-    
+    public String IdentityPoolId {get; set;}
+
+    ApexPages.StandardController con;
+
     public AWS_BigFileUploadController(ApexPages.StandardController stdController) {
         this.con = stdController;
         // Fetch the Aws Credentials
-        Aws_Credentials__mdt awsCredentials = Aws_Credentials__mdt.getInstance('********'); 
-        
+        Aws_Credentials__mdt awsCredentials = Aws_Credentials__mdt.getInstance('********');
         bucketName = awsCredentials.Bucket_Name__c;
         secret = awsCredentials.Secret_Key__c;
         key = awsCredentials.Key_Id__c;
         bucketRegion = awsCredentials.Bucket_Region__c;
-        IdentityPoolId = awsCredentials.IdentityPoolId__c;      
-        
-    }   
-    
+        IdentityPoolId = awsCredentials.IdentityPoolId__c;
+
+    }
+
     public List<AWS_File__c> awsFileList {
         get {
             if (awsFileList == null) {
