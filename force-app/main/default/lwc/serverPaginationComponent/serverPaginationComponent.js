@@ -1,3 +1,6 @@
+/** Server Side Pagination component
+ * Server Page
+ */
 import { LightningElement } from 'lwc';
 import { columns } from './tableColumns.js';
 import getAccountData from '@salesforce/apex/DataTableServerController.getAccountData';
